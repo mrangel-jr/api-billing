@@ -10,10 +10,8 @@ func SetupRoutes(app *app.Application) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Get("/health", app.HealthCheck)
-	r.Get("/consume/{year}/{month}/{sku}", app.TenantHandler.GetConsumeBySKU)
-	// r.Get("/consume/sku/{sku}", app.GetConsumeBySKU)
-	// r.Get("/consume/tenant", app.GetConsumeByTenant)
-	// r.Get("/consume/tenant/{tenant}", app.GetConsumeByTenantSKU)
-	// r.Get("/consume/tenant/{tenant}/sku/{sku}", app.GetConsumeByTenantSKU)
+	r.Get("/consume/{year_month}/{sku}", app.TenantHandler.GetConsumeBySKU)
+	r.Get("/consume/{year_month}", app.TenantHandler.GetConsumeByTenant)
+
 	return r
 }
