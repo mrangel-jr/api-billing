@@ -1,0 +1,14 @@
+1.1:
+curl -X GET "http://localhost:8081/consume/202504" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlbmFudF9qIiwiaXNzIjoibXktYXBwIiwic3ViIjoidXNlci0xMjMiLCJleHAiOjE3NDU1ODkzMzUsImlhdCI6MTcxMzcwNzA2MSwiYXVkIjoibXktYXVkaWVuY2UiLCJqdGkiOiJ1bmlxdWUtaWQtMTIzIn0.7u5SqASJBNT5kQmDRxLYCkgiehLQWuMsKkteiFGOa6A" \
+     -H "Content-Type: application/json"
+
+2.1:
+curl -X GET "http://localhost:8081/consume/202504/SKU-002" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlbmFudF9qIiwiaXNzIjoibXktYXBwIiwic3ViIjoidXNlci0xMjMiLCJleHAiOjE3NDU1ODkzMzUsImlhdCI6MTcxMzcwNzA2MSwiYXVkIjoibXktYXVkaWVuY2UiLCJqdGkiOiJ1bmlxdWUtaWQtMTIzIn0.7u5SqASJBNT5kQmDRxLYCkgiehLQWuMsKkteiFGOa6A" \
+     -H "Content-Type: application/json"
+
+3.1:
+curl -X GET "http://localhost:8081/consume/202504/summary" \
+     -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlbmFudF9qIiwiaXNzIjoibXktYXBwIiwic3ViIjoidXNlci0xMjMiLCJleHAiOjE3NDU1ODkzMzUsImlhdCI6MTcxMzcwNzA2MSwiYXVkIjoibXktYXVkaWVuY2UiLCJqdGkiOiJ1bmlxdWUtaWQtMTIzIn0.7u5SqASJBNT5kQmDRxLYCkgiehLQWuMsKkteiFGOa6A" \
+     -H "Content-Type: application/json"

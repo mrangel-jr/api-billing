@@ -16,12 +16,9 @@ type CustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-// AuthMiddleware is a middleware that checks the JWT token
-// and adds the user to the request context
 type AuthMiddleware struct{}
 type contextKey string
 
-const UserContextKey = contextKey("username")
 const ClaimsContextKey = contextKey("claims")
 
 func GetUser(r *http.Request) (string, error) {

@@ -113,3 +113,23 @@ func WriteJSON(w http.ResponseWriter, status int, data Envelope) error {
 	w.Write(js)
 	return nil
 }
+
+func Pagination(r *http.Request) (int, int) {
+	page, pageSize := 1, 10
+
+	pageStr := r.URL.Query().Get("page")         // Get the 'page' query parameter
+	pageSizeStr := r.URL.Query().Get("pageSize") // Get the 'pageSize' query parameter
+	if pageSizeStr != "" {
+		pageSize, _ = strconv.Atoi(pageSizeStr)
+		if pageSize < 1 {
+			pageSize = 1
+		}
+	}
+	if pageStr != "" {
+		page, _ = strconv.Atoi(pageStr)
+		if page < 1 {
+			page = 1
+		}
+	}
+	return page, pageSize
+}

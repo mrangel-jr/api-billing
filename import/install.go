@@ -6,7 +6,6 @@ import (
 	"log"
 	"time"
 
-	// "github.com/robfig/cron/v3"
 	"github.cm/mrangel-jr/api-billing/data"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -31,18 +30,6 @@ func main() {
 		log.Println("Aggregation error:", err)
 	}
 
-	// // Cron job every 30 min
-	// c := cron.New()
-	// c.AddFunc("0,30 * * * *", func() {
-	// 	fmt.Println("⏱ Running aggregation at", time.Now().Format(time.RFC3339))
-	// 	err := runAggregation(ctx, sourceCollection, targetCollection)
-	// 	if err != nil {
-	// 		log.Println("Aggregation error:", err)
-	// 	}
-	// })
-	// c.Start()
-
-	// select {} // Block forever
 }
 
 func runAggregation(ctx context.Context, source *mongo.Collection, target *mongo.Collection) error {

@@ -24,6 +24,32 @@ type UsageSummarySKU struct {
 	TotalUsed int64 `bson:"total_used"`
 }
 
+type SummarySKUPagination struct {
+	Page     int
+	PageSize int
+	Data     *[]UsageSummarySKU
+}
+
+type TenantQuery struct {
+	Tenant string
+	Year   int
+	Month  int
+}
+type TenantSKUQuery struct {
+	Tenant     string
+	ProductSKU string
+	Year       int
+	Month      int
+}
+
+type TenantQueryPagination struct {
+	Tenant   string
+	Year     int
+	Month    int
+	Page     int
+	PageSize int
+}
+
 type MongoTenantStore struct {
 	db         *MongoRepository
 	collection string
@@ -38,20 +64,19 @@ func NewMongoTenantStore(client *MongoRepository) *MongoTenantStore {
 }
 
 type TenantStore interface {
-	GetConsumeByTenant(year int, month int) (*UsageSummary, error)
-	GetConsumeBySKU(sku string, month int, year int) (*UsageSummarySKU, error)
-	GetAllConsumes(month int, year int) (*[]UsageSummarySKU, error)
+	GetConsumeByTenant(consumeParams TenantQuery) (*UsageSummary, error)
+	GetConsumeBySKU(consumeParams TenantSKUQuery) (*UsageSummarySKU, error)
+	GetAllConsumes(consumeParams TenantQueryPagination) (*[]UsageSummarySKU, error)
 }
 
-func (m *MongoTenantStore) GetConsumeByTenant(year int, month int) (*UsageSummary, error) {
+func (m *MongoTenantStore) GetConsumeByTenant(consumeParams TenantQuery) (*UsageSummary, error) {
 	collection := m.db.GetCollection(m.collection)
 	fmt.Printf("Collection Name: %v\n", collection.Name())
-	startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
-	endDate := utils.LastDayOfMonth(year, time.Month(month))
-	tenantName := "tenant_j"
+	startDate := time.Date(consumeParams.Year, time.Month(consumeParams.Month), 1, 0, 0, 0, 0, time.UTC)
+	endDate := utils.LastDayOfMonth(consumeParams.Year, time.Month(consumeParams.Month))
 
 	filterSummary := bson.D{
-		{Key: "tenant.tenant", Value: tenantName},
+		{Key: "tenant.tenant", Value: consumeParams.Tenant},
 		{Key: "created_at", Value: bson.D{
 			{Key: "$gte", Value: startDate},
 			{Key: "$lte", Value: endDate},
@@ -91,18 +116,16 @@ func (m *MongoTenantStore) GetConsumeByTenant(year int, month int) (*UsageSummar
 
 }
 
-func (m *MongoTenantStore) GetConsumeBySKU(sku string, year int, month int) (*UsageSummarySKU, error) {
+func (m *MongoTenantStore) GetConsumeBySKU(consumeParams TenantSKUQuery) (*UsageSummarySKU, error) {
 	collection := m.db.GetCollection(m.collection)
-	fmt.Printf("Collection Name: %v\n", collection.Name())
-	startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
-	endDate := utils.LastDayOfMonth(year, time.Month(month))
-	tenantName := "tenant_j"
+	startDate := time.Date(consumeParams.Year, time.Month(consumeParams.Month), 1, 0, 0, 0, 0, time.UTC)
+	endDate := utils.LastDayOfMonth(consumeParams.Year, time.Month(consumeParams.Month))
 
 	ctx := context.Background()
 
 	filterSummary := bson.D{
-		{Key: "tenant.tenant", Value: tenantName},
-		{Key: "tenant.product_sku", Value: sku},
+		{Key: "tenant.tenant", Value: consumeParams.Tenant},
+		{Key: "tenant.product_sku", Value: consumeParams.ProductSKU},
 		{Key: "created_at", Value: bson.D{
 			{Key: "$gte", Value: startDate},
 			{Key: "$lte", Value: endDate},
@@ -137,7 +160,7 @@ func (m *MongoTenantStore) GetConsumeBySKU(sku string, year int, month int) (*Us
 			return nil, err
 		}
 	} else {
-		return nil, fmt.Errorf("no results found for SKU %s", sku)
+		return nil, fmt.Errorf("no results found for SKU %s", consumeParams.ProductSKU)
 	}
 
 	if err := cursor.Err(); err != nil {
@@ -148,16 +171,16 @@ func (m *MongoTenantStore) GetConsumeBySKU(sku string, year int, month int) (*Us
 
 }
 
-func (m *MongoTenantStore) GetAllConsumes(tenant string, year int, month int, page int, pageSize int) (*[]UsageSummarySKU, error) {
+func (m *MongoTenantStore) GetAllConsumes(consumeParams TenantQueryPagination) (*[]UsageSummarySKU, error) {
 	collection := m.db.GetCollection(m.collection)
-	startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
-	endDate := utils.LastDayOfMonth(year, time.Month(month))
-	skip := (page - 1) * pageSize
+	startDate := time.Date(consumeParams.Year, time.Month(consumeParams.Month), 1, 0, 0, 0, 0, time.UTC)
+	endDate := utils.LastDayOfMonth(consumeParams.Year, time.Month(consumeParams.Month))
+	skip := (consumeParams.Page - 1) * consumeParams.PageSize
 
 	ctx := context.Background()
 
 	filterSummary := bson.D{
-		{Key: "tenant.tenant", Value: tenant},
+		{Key: "tenant.tenant", Value: consumeParams.Tenant},
 		{Key: "created_at", Value: bson.D{
 			{Key: "$gte", Value: startDate},
 			{Key: "$lte", Value: endDate},
@@ -181,7 +204,7 @@ func (m *MongoTenantStore) GetAllConsumes(tenant string, year int, month int, pa
 		{{Key: "$match", Value: filterSummary}},
 		{{Key: "$group", Value: groupStage}},
 		{{Key: "$skip", Value: skip}},
-		{{Key: "$limit", Value: pageSize}},
+		{{Key: "$limit", Value: consumeParams.PageSize}},
 	}
 
 	cursor, err := collection.Aggregate(context.Background(), pipeline)
@@ -205,7 +228,7 @@ func (m *MongoTenantStore) GetAllConsumes(tenant string, year int, month int, pa
 	}
 
 	if len(result) == 0 {
-		return nil, fmt.Errorf("no results found for tenant %s", tenant)
+		return nil, fmt.Errorf("no results found for tenant %s", consumeParams.Tenant)
 	}
 
 	return &result, nil

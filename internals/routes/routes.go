@@ -14,8 +14,8 @@ func SetupRoutes(app *app.Application) *chi.Mux {
 		r.Use(middleware.Logger)
 
 		r.Get("/consume/{year_month}/{sku}", app.TenantHandler.GetConsumeBySKU)
-		r.Get("/consume/{year_month}/{tenant}", app.TenantHandler.GetAllConsumes)
-		r.Get("/consume/{year_month}", app.TenantHandler.GetConsumeByTenant)
+		r.Get("/consume/{year_month}/summary", app.TenantHandler.GetConsumeByTenant)
+		r.Get("/consume/{year_month}", app.TenantHandler.GetAllConsumes)
 
 	})
 
