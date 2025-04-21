@@ -8,12 +8,16 @@ import (
 
 	"github.cm/mrangel-jr/api-billing/internals/app"
 	"github.cm/mrangel-jr/api-billing/internals/routes"
+	"github.com/joho/godotenv"
 )
 
 func main() {
 	var port int
 	flag.IntVar(&port, "port", 8081, "Go backend server port")
 	flag.Parse()
+	if err := godotenv.Load(); err != nil {
+		fmt.Printf("No .env file found or failed to load: %v", err)
+	}
 	app, err := app.NewApplication()
 	if err != nil {
 		panic(err)

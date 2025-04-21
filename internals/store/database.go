@@ -2,6 +2,8 @@ package store
 
 import (
 	"context"
+	"log"
+	"os"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -25,5 +27,10 @@ func (m *MongoRepository) Close() {
 	}
 }
 func (m *MongoRepository) GetCollection(name string) *mongo.Collection {
-	return m.db.Database("magalu_billing").Collection(name)
+	// Check if the database is connected
+	dbStr := os.Getenv("MONGO_DATABASE")
+	if dbStr == "" {
+		log.Fatalf("DATABASE_URL not set in environment")
+	}
+	return m.db.Database(dbStr).Collection(name)
 }

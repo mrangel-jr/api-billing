@@ -92,6 +92,13 @@ func ReadSKUParam(r *http.Request) (string, error) {
 	}
 	return skuParam, nil
 }
+func ReadTenantParam(r *http.Request) (string, error) {
+	tenantParam := chi.URLParam(r, "tenant")
+	if tenantParam == "" {
+		return "", errors.New("invalid year parameter")
+	}
+	return tenantParam, nil
+}
 
 func WriteJSON(w http.ResponseWriter, status int, data Envelope) error {
 	js, err := json.MarshalIndent(data, "", " ")

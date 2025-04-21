@@ -29,3 +29,6 @@ tmp
 
 # mongo-data folder
 mongo-data
+
+# IDE files
+.vscode/

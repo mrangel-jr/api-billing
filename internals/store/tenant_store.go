@@ -3,6 +3,8 @@ package store
 import (
 	"context"
 	"fmt"
+	"log"
+	"os"
 	"time"
 
 	"github.cm/mrangel-jr/api-billing/internals/utils"
@@ -23,20 +25,26 @@ type UsageSummarySKU struct {
 }
 
 type MongoTenantStore struct {
-	db *MongoRepository
+	db         *MongoRepository
+	collection string
 }
 
 func NewMongoTenantStore(client *MongoRepository) *MongoTenantStore {
-	return &MongoTenantStore{db: client}
+	magalu_collection := os.Getenv("MONGO_COLLECTION_AGGREGATION")
+	if magalu_collection == "" {
+		log.Fatalf("MONGO_COLLECTION_AGGREGATION not set in environment")
+	}
+	return &MongoTenantStore{db: client, collection: magalu_collection}
 }
 
 type TenantStore interface {
 	GetConsumeByTenant(year int, month int) (*UsageSummary, error)
 	GetConsumeBySKU(sku string, month int, year int) (*UsageSummarySKU, error)
+	GetAllConsumes(month int, year int) (*[]UsageSummarySKU, error)
 }
 
 func (m *MongoTenantStore) GetConsumeByTenant(year int, month int) (*UsageSummary, error) {
-	collection := m.db.GetCollection("magalu_billing_aggragation")
+	collection := m.db.GetCollection(m.collection)
 	fmt.Printf("Collection Name: %v\n", collection.Name())
 	startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
 	endDate := utils.LastDayOfMonth(year, time.Month(month))
@@ -84,7 +92,7 @@ func (m *MongoTenantStore) GetConsumeByTenant(year int, month int) (*UsageSummar
 }
 
 func (m *MongoTenantStore) GetConsumeBySKU(sku string, year int, month int) (*UsageSummarySKU, error) {
-	collection := m.db.GetCollection("magalu_billing_aggragation")
+	collection := m.db.GetCollection(m.collection)
 	fmt.Printf("Collection Name: %v\n", collection.Name())
 	startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
 	endDate := utils.LastDayOfMonth(year, time.Month(month))
@@ -134,6 +142,70 @@ func (m *MongoTenantStore) GetConsumeBySKU(sku string, year int, month int) (*Us
 
 	if err := cursor.Err(); err != nil {
 		return nil, err
+	}
+
+	return &result, nil
+
+}
+
+func (m *MongoTenantStore) GetAllConsumes(tenant string, year int, month int, page int, pageSize int) (*[]UsageSummarySKU, error) {
+	collection := m.db.GetCollection(m.collection)
+	startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
+	endDate := utils.LastDayOfMonth(year, time.Month(month))
+	skip := (page - 1) * pageSize
+
+	ctx := context.Background()
+
+	filterSummary := bson.D{
+		{Key: "tenant.tenant", Value: tenant},
+		{Key: "created_at", Value: bson.D{
+			{Key: "$gte", Value: startDate},
+			{Key: "$lte", Value: endDate},
+		}},
+	}
+
+	groupStage := bson.D{
+		{Key: "_id", Value: bson.D{
+			{Key: "tenant", Value: "$tenant.tenant"},
+			{Key: "product_sku", Value: "$tenant.product_sku"},
+		}},
+		{Key: "total_used", Value: bson.D{
+			{Key: "$sum", Value: "$total_used"},
+		}},
+		{Key: "count", Value: bson.D{
+			{Key: "$sum", Value: 1},
+		}},
+	}
+
+	pipeline := mongo.Pipeline{
+		{{Key: "$match", Value: filterSummary}},
+		{{Key: "$group", Value: groupStage}},
+		{{Key: "$skip", Value: skip}},
+		{{Key: "$limit", Value: pageSize}},
+	}
+
+	cursor, err := collection.Aggregate(context.Background(), pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var result []UsageSummarySKU
+
+	for cursor.Next(ctx) {
+		var item UsageSummarySKU
+		if err := cursor.Decode(&item); err != nil {
+			return nil, err
+		}
+		result = append(result, item)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	if len(result) == 0 {
+		return nil, fmt.Errorf("no results found for tenant %s", tenant)
 	}
 
 	return &result, nil
