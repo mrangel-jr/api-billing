@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.cm/mrangel-jr/api-billing/internals/middleware"
-	"github.cm/mrangel-jr/api-billing/internals/store"
-	"github.cm/mrangel-jr/api-billing/internals/utils"
+	"github.com/mrangel-jr/api-billing/internals/middleware"
+	"github.com/mrangel-jr/api-billing/internals/store"
+	"github.com/mrangel-jr/api-billing/internals/utils"
 )
 
 type TenantHandler struct {

@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.cm/mrangel-jr/api-billing/internals/api"
-	"github.cm/mrangel-jr/api-billing/internals/middleware"
-	"github.cm/mrangel-jr/api-billing/internals/store"
+	"github.com/mrangel-jr/api-billing/internals/api"
+	"github.com/mrangel-jr/api-billing/internals/middleware"
+	"github.com/mrangel-jr/api-billing/internals/store"
 )
 
 type Application struct {

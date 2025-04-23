@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.cm/mrangel-jr/api-billing/internals/utils"
+	"github.com/mrangel-jr/api-billing/internals/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )

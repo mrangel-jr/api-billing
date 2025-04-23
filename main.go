@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.cm/mrangel-jr/api-billing/internals/app"
-	"github.cm/mrangel-jr/api-billing/internals/routes"
 	"github.com/joho/godotenv"
+	"github.com/mrangel-jr/api-billing/internals/app"
+	"github.com/mrangel-jr/api-billing/internals/routes"
 )
 
 func main() {

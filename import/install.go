@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.cm/mrangel-jr/api-billing/data"
+	"github.com/mrangel-jr/api-billing/data"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

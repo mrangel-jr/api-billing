@@ -43,7 +43,7 @@ func (am *AuthMiddleware) JWTMiddleware(next http.Handler) http.Handler {
 
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-			http.Error(w, "Missing or invalid Authorization header", http.StatusUnauthorized)
+			http.Error(w, "Missing Authorization header", http.StatusUnauthorized)
 			return
 		}
 
