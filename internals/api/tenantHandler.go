@@ -123,14 +123,13 @@ func (th *TenantHandler) GetAllConsumes(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	page, pageSize := utils.Pagination(r)
+	pagination := utils.CreatePagination(r)
 
 	consumeParams := store.TenantQueryPagination{
-		Tenant:   tenant,
-		Year:     year,
-		Month:    month,
-		Page:     page,
-		PageSize: pageSize,
+		Tenant:     tenant,
+		Year:       year,
+		Month:      month,
+		Pagination: pagination,
 	}
 
 	tenantConsumes, err := th.tenantStore.GetAllConsumes(consumeParams)
@@ -142,9 +141,8 @@ func (th *TenantHandler) GetAllConsumes(w http.ResponseWriter, r *http.Request) 
 	}
 
 	dataPagination := store.SummarySKUPagination{
-		Page:     page,
-		PageSize: pageSize,
-		Data:     tenantConsumes,
+		Pagination: pagination,
+		Data:       tenantConsumes,
 	}
 	utils.WriteJSON(w, http.StatusOK, utils.Envelope{"payload": dataPagination})
 }

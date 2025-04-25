@@ -25,9 +25,8 @@ type UsageSummarySKU struct {
 }
 
 type SummarySKUPagination struct {
-	Page     int
-	PageSize int
-	Data     *[]UsageSummarySKU
+	utils.Pagination
+	Data *[]UsageSummarySKU
 }
 
 type TenantQuery struct {
@@ -43,11 +42,10 @@ type TenantSKUQuery struct {
 }
 
 type TenantQueryPagination struct {
-	Tenant   string
-	Year     int
-	Month    int
-	Page     int
-	PageSize int
+	Tenant string
+	Year   int
+	Month  int
+	utils.Pagination
 }
 
 type MongoTenantStore struct {
@@ -175,7 +173,7 @@ func (m *MongoTenantStore) GetAllConsumes(consumeParams TenantQueryPagination) (
 	collection := m.db.GetCollection(m.collection)
 	startDate := time.Date(consumeParams.Year, time.Month(consumeParams.Month), 1, 0, 0, 0, 0, time.UTC)
 	endDate := utils.LastDayOfMonth(consumeParams.Year, time.Month(consumeParams.Month))
-	skip := (consumeParams.Page - 1) * consumeParams.PageSize
+	skip := (consumeParams.Pagination.Page - 1) * consumeParams.Pagination.PageSize
 
 	ctx := context.Background()
 
@@ -204,7 +202,7 @@ func (m *MongoTenantStore) GetAllConsumes(consumeParams TenantQueryPagination) (
 		{{Key: "$match", Value: filterSummary}},
 		{{Key: "$group", Value: groupStage}},
 		{{Key: "$skip", Value: skip}},
-		{{Key: "$limit", Value: consumeParams.PageSize}},
+		{{Key: "$limit", Value: consumeParams.Pagination.PageSize}},
 	}
 
 	cursor, err := collection.Aggregate(context.Background(), pipeline)

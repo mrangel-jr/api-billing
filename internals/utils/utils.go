@@ -12,50 +12,9 @@ import (
 
 type Envelope map[string]interface{}
 
-func ReadIDParam(r *http.Request) (int, error) {
-	idParam := chi.URLParam(r, "id")
-	if idParam == "" {
-		return 0, errors.New("invalid id parameter")
-	}
-	id, err := strconv.Atoi(idParam)
-	if err != nil {
-		return 0, errors.New("invalid id parameter type")
-	}
-	return id, nil
-}
-
-func ReadYearParam(r *http.Request) (int, error) {
-	yearParam := chi.URLParam(r, "year")
-	if yearParam == "" {
-		return 0, errors.New("invalid year parameter")
-	}
-	year, err := strconv.Atoi(yearParam)
-	if err != nil {
-		return 0, errors.New("invalid year parameter type")
-	}
-
-	actualYear := time.Now().Year()
-
-	if year < 1900 || year > actualYear {
-		return 0, errors.New("invalid year parameter value")
-	}
-	return year, nil
-}
-
-func ReadMonthParam(r *http.Request) (int, error) {
-	monthParam := chi.URLParam(r, "month")
-	if monthParam == "" {
-		return 0, errors.New("invalid year parameter")
-	}
-	month, err := strconv.Atoi(monthParam)
-	if err != nil {
-		return 0, errors.New("invalid month parameter type")
-	}
-
-	if month < 1 || month > 12 {
-		return 0, errors.New("invalid month parameter value")
-	}
-	return month, nil
+type Pagination struct {
+	Page     int
+	PageSize int
 }
 
 func ReadYearMonthParam(r *http.Request) (int, int, error) {
@@ -114,22 +73,23 @@ func WriteJSON(w http.ResponseWriter, status int, data Envelope) error {
 	return nil
 }
 
-func Pagination(r *http.Request) (int, int) {
-	page, pageSize := 1, 10
+func CreatePagination(r *http.Request) Pagination {
+	var pagination Pagination
+	pagination.Page, pagination.PageSize = 1, 10
 
 	pageStr := r.URL.Query().Get("page")         // Get the 'page' query parameter
 	pageSizeStr := r.URL.Query().Get("pageSize") // Get the 'pageSize' query parameter
 	if pageSizeStr != "" {
-		pageSize, _ = strconv.Atoi(pageSizeStr)
-		if pageSize < 1 {
-			pageSize = 1
+		pagination.PageSize, _ = strconv.Atoi(pageSizeStr)
+		if pagination.PageSize < 1 {
+			pagination.PageSize = 10
 		}
 	}
 	if pageStr != "" {
-		page, _ = strconv.Atoi(pageStr)
-		if page < 1 {
-			page = 1
+		pagination.Page, _ = strconv.Atoi(pageStr)
+		if pagination.Page < 1 {
+			pagination.Page = 1
 		}
 	}
-	return page, pageSize
+	return pagination
 }
