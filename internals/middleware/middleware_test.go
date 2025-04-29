@@ -7,8 +7,6 @@ import (
 	"testing"
 	"time"
 
-	// "time"
-
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/mrangel-jr/api-billing/internals/middleware"
 	"github.com/stretchr/testify/assert"
